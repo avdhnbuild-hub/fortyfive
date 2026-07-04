@@ -12,6 +12,39 @@ import { getFeatured, getLatest, getDeepReads, CATEGORIES, FUNDING } from '@/lib
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
+const description = 'fortyfive covers startups, technology, capital, AI, growth, markets, and the companies shaping what comes next.';
+
+export const metadata = {
+  title: {
+    absolute: 'fortyfive | The new economy, clearly explained',
+  },
+  description,
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: 'fortyfive | The new economy, clearly explained',
+    description,
+    siteName: 'fortyfive',
+    type: 'website',
+    url: '/',
+    images: [
+      {
+        url: '/og-image.svg',
+        width: 1200,
+        height: 630,
+        alt: 'fortyfive',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'fortyfive | The new economy, clearly explained',
+    description,
+    images: ['/og-image.svg'],
+  },
+};
+
 export default function HomePage() {
   const featured = getFeatured();
   const latest = getLatest(8);

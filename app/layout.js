@@ -1,15 +1,40 @@
 import './globals.css';
 import { Toaster } from 'sonner';
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://fortyfive.vercel.app';
+const description = 'Startups, technology, capital, AI, growth, markets, and the companies shaping what comes next.';
+
 export const metadata = {
-  title: 'fortyfive: Startups, technology, capital, and growth',
-  description:
-    'fortyfive covers startups, technology, capital, AI, growth, markets, and the companies shaping what comes next.',
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: 'fortyfive',
+    template: '%s | fortyfive',
+  },
+  description,
   keywords: ['fortyfive', 'startups', 'technology', 'capital', 'funding', 'AI', 'growth', 'markets', 'India', 'global business'],
+  icons: {
+    icon: '/favicon.svg',
+  },
   openGraph: {
-    title: 'fortyfive: Startups, technology, capital, and growth',
-    description: 'Startups, technology, capital, AI, growth, markets, and the companies shaping what comes next.',
+    title: 'fortyfive',
+    description,
+    siteName: 'fortyfive',
     type: 'website',
+    url: siteUrl,
+    images: [
+      {
+        url: '/og-image.svg',
+        width: 1200,
+        height: 630,
+        alt: 'fortyfive',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'fortyfive',
+    description,
+    images: ['/og-image.svg'],
   },
 };
 
