@@ -1,7 +1,7 @@
 import AdminShell from '@/components/admin/AdminShell';
 
 export const metadata = {
-  title: 'Admin — fortyfive',
+  title: 'Admin: fortyfive',
   description: 'Local-only fortyfive CMS admin.',
 };
 

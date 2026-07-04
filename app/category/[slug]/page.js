@@ -24,9 +24,9 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const cat = getPageCategory(slug);
-  if (!cat) return { title: 'Category — fortyfive' };
+  if (!cat) return { title: 'Category: fortyfive' };
   return {
-    title: `${cat.name} — fortyfive`,
+    title: `${cat.name}: fortyfive`,
     description: cat.tagline,
   };
 }

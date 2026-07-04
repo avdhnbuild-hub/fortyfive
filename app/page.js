@@ -21,12 +21,12 @@ export default function HomePage() {
     <div className="min-h-screen flex flex-col bg-paper">
       <Header />
       <main className="flex-1">
-        <Hero featured={featured} />
+        <Hero featured={featured} latest={latest} />
 
         {/* Latest */}
         <section className="container py-20 md:py-24">
           <SectionHeader eyebrow="What's new" title="Latest" cta="All stories" href="/search" />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-x-8 md:gap-y-14">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-x-12 md:gap-y-16">
             {latest.map((a) => (
               <ArticleCard key={a.slug} article={a} />
             ))}
@@ -38,7 +38,7 @@ export default function HomePage() {
         <section className="bg-white border-y border-line">
           <div className="container py-20 md:py-24">
             <SectionHeader eyebrow="Sections" title="Explore" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
               {CATEGORIES.map((c) => (
                 <CategoryCard key={c.slug} category={c} />
               ))}
@@ -49,8 +49,8 @@ export default function HomePage() {
         {/* Deep Reads */}
         <section className="container py-20 md:py-24">
           <SectionHeader eyebrow="Long form" title="Deep Reads" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
-            {deep.map((a) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            {deep.slice(0, 3).map((a) => (
               <DeepReadCard key={a.slug} article={a} />
             ))}
             <CmsArticleCards deepOnly card="deep" excludeSlugs={deep.map((a) => a.slug)} />
@@ -64,7 +64,7 @@ export default function HomePage() {
               <p className="eyebrow text-signal mb-3">Capital</p>
               <h2 className="font-editorial text-[40px] md:text-[52px] leading-none tracking-tight">Funding</h2>
               <p className="mt-5 text-[15px] text-ink/70 leading-relaxed max-w-sm">
-                Recent capital movement across startups, AI, markets, and the new economy. Clean rows, no dashboards.
+                Recent capital movement across startups, AI, markets, and technology companies.
               </p>
               <Link href="/category/funding" className="mt-6 inline-flex items-center gap-2 text-[14px] font-medium text-ink hover:text-signal transition-colors group">
                 View more funding stories

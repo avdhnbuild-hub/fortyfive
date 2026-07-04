@@ -2,13 +2,13 @@ import './globals.css';
 import { Toaster } from 'sonner';
 
 export const metadata = {
-  title: 'fortyfive — Startups, technology, capital, and growth — clearly explained.',
+  title: 'fortyfive: Startups, technology, capital, and growth',
   description:
-    'fortyfive covers startups, technology, capital, AI, growth, markets, and new-economy stories globally — with a strong India lens. Clear stories. Sharp context. No noise.',
+    'fortyfive covers startups, technology, capital, AI, growth, markets, and the companies shaping what comes next.',
   keywords: ['fortyfive', 'startups', 'technology', 'capital', 'funding', 'AI', 'growth', 'markets', 'India', 'global business'],
   openGraph: {
-    title: 'fortyfive — Startups, technology, capital, and growth — clearly explained.',
-    description: 'Global startup, technology, capital, AI, markets, and growth stories with a strong India lens.',
+    title: 'fortyfive: Startups, technology, capital, and growth',
+    description: 'Startups, technology, capital, AI, growth, markets, and the companies shaping what comes next.',
     type: 'website',
   },
 };

@@ -3,8 +3,8 @@ import Footer from '@/components/site/Footer';
 import NewsletterCTA from '@/components/site/NewsletterCTA';
 
 export const metadata = {
-  title: 'About — fortyfive',
-  description: 'Startups, technology, capital, AI, growth, markets, and new-economy stories globally — with a strong India lens.',
+  title: 'About: fortyfive',
+  description: 'Startups, technology, capital, AI, growth, markets, and the companies shaping what comes next.',
 };
 
 export default function AboutPage() {
@@ -15,13 +15,12 @@ export default function AboutPage() {
         <section className="container pt-14 md:pt-24 pb-16 max-w-3xl">
           <p className="eyebrow text-signal">About</p>
           <h1 className="mt-4 font-editorial text-[48px] md:text-[80px] leading-[0.98] tracking-tight">
-            A publication for the new economy.
+            A publication for startups, technology, and capital.
           </h1>
 
           <div className="mt-12 space-y-6 text-[17px] md:text-[19px] leading-[1.7] text-ink/85">
             <p>
-              <strong className="text-ink font-semibold">fortyfive</strong> covers startups, technology, capital, AI,
-              growth, markets, and new-economy stories globally — with a strong India lens.
+              <strong className="text-ink font-semibold">fortyfive</strong> is a publication covering startups, technology, capital, AI, growth, markets, and the companies shaping what comes next.
             </p>
             <p>
               Most startup and technology coverage focuses on announcements. Who raised money. Who launched. Who exited. Who failed.
@@ -37,7 +36,7 @@ export default function AboutPage() {
           <div className="mt-16 p-8 md:p-10 bg-ink text-white rounded-2xl">
             <p className="eyebrow text-signal mb-3">Our promise</p>
             <p className="font-editorial text-[32px] md:text-[44px] leading-[1.05] tracking-tight">
-              Clear stories. Sharp context. No noise.
+              Useful reporting for people building, backing, and studying technology companies.
             </p>
           </div>
 
@@ -45,7 +44,7 @@ export default function AboutPage() {
             <div>
               <p className="eyebrow text-signal mb-4">What we cover</p>
               <ul className="space-y-2 text-[16px]">
-                {['Startups', 'Technology', 'Capital', 'AI', 'Growth', 'Markets', 'Founder strategy', 'India lens'].map((x) => (
+                {['Startups', 'Technology', 'Capital', 'AI', 'Growth', 'Markets', 'Founder strategy', 'India'].map((x) => (
                   <li key={x} className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-signal" /> {x}
                   </li>
@@ -55,7 +54,7 @@ export default function AboutPage() {
             <div>
               <p className="eyebrow text-signal mb-4">Who it is for</p>
               <ul className="space-y-2 text-[16px]">
-                {['Founders', 'Students', 'Operators', 'Investors', 'Creators', 'Anyone trying to understand the new economy'].map((x) => (
+                {['Founders', 'Students', 'Operators', 'Investors', 'Creators', 'Anyone following technology and markets'].map((x) => (
                   <li key={x} className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-signal" /> {x}
                   </li>

@@ -36,7 +36,7 @@ export default function NewsletterCTA({ variant = 'full' }) {
       <div className="bg-white border border-line rounded-[14px] p-6 md:p-8">
         <p className="eyebrow text-signal">Newsletter</p>
         <h3 className="mt-3 font-editorial text-[26px] md:text-[30px] leading-[1.1] tracking-tight">
-          Understand the new economy without the noise.
+          Read the stories behind startups, capital, and technology.
         </h3>
         {done ? (
           <p className="mt-4 text-[15px] text-ink/80">Subscribed.</p>
@@ -54,7 +54,7 @@ export default function NewsletterCTA({ variant = 'full' }) {
             </button>
           </form>
         )}
-        <p className="mt-3 text-[12px] text-ash">No spam. Just clear context.</p>
+        <p className="mt-3 text-[12px] text-ash">No spam. Just useful stories.</p>
       </div>
     );
   }
@@ -65,7 +65,7 @@ export default function NewsletterCTA({ variant = 'full' }) {
         <div className="md:col-span-7">
           <p className="eyebrow text-signal">Newsletter</p>
           <h2 className="mt-4 font-editorial text-[38px] md:text-[56px] leading-[1.02] tracking-tight">
-            Understand the new economy without the noise.
+            Read the stories behind startups, capital, and technology.
           </h2>
           <p className="mt-5 text-[16px] md:text-[18px] text-white/70 leading-relaxed max-w-xl">
             Get sharp stories on startups, technology, capital, AI, markets, and growth from fortyfive.
@@ -89,7 +89,7 @@ export default function NewsletterCTA({ variant = 'full' }) {
               <button className="w-full h-14 rounded-xl bg-signal text-white text-[15px] font-medium hover:bg-white hover:text-ink transition-colors">
                 Subscribe
               </button>
-              <p className="text-[12px] text-white/50">No spam. Just clear context.</p>
+              <p className="text-[12px] text-white/50">No spam. Just useful stories.</p>
             </form>
           )}
         </div>

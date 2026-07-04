@@ -10,9 +10,9 @@ export default function Footer() {
             <span className="w-[8px] h-[8px] rounded-full bg-signal translate-y-[-2px]" />
           </div>
           <p className="mt-6 text-white/70 max-w-md text-[15px] leading-relaxed">
-            Startups, technology, capital, and growth — clearly explained. Global stories with a strong India lens.
+            Startups, technology, capital, and growth. Clear stories without the noise.
           </p>
-          <p className="mt-6 text-signal eyebrow">Clear stories. Sharp context. No noise.</p>
+          <p className="mt-6 text-signal eyebrow">Sharp reporting for founders and operators.</p>
         </div>
 
         <div className="md:col-span-3">
@@ -52,7 +52,7 @@ export default function Footer() {
       <div className="border-t border-white/10">
         <div className="container py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-[12px] text-white/50">
           <p>&copy; {new Date().getFullYear()} fortyfive. All rights reserved.</p>
-          <p>Global publication with a strong India lens.</p>
+          <p>Technology, startups, capital, and growth.</p>
         </div>
       </div>
     </footer>

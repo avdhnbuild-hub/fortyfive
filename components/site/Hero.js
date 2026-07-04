@@ -2,38 +2,38 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { CATEGORIES } from '@/lib/data';
 
-export default function Hero({ featured }) {
+export default function Hero({ featured, latest = [] }) {
   const cat = CATEGORIES.find((c) => c.slug === featured.category);
+  const latestItems = latest.slice(0, 3);
+
+  const categoryName = (article) =>
+    CATEGORIES.find((category) => category.slug === article.category)?.name || article.categoryName || article.category;
+
   return (
     <section className="border-b border-line">
-      <div className="container pt-10 md:pt-16 pb-14 md:pb-20">
-        <div className="max-w-4xl">
-          <p className="eyebrow text-signal">Global stories. India lens.</p>
-          <h1 className="mt-5 font-editorial text-[46px] sm:text-[62px] md:text-[84px] leading-[0.98] tracking-tight">
-            Startups, technology, capital,<br className="hidden md:block" /> <span className="italic">clearly explained.</span>
+      <div className="container pt-8 md:pt-12 pb-12 md:pb-16">
+        <div className="max-w-3xl">
+          <p className="eyebrow text-signal">TECHNOLOGY. STARTUPS. GROWTH.</p>
+          <h1 className="mt-4 text-[38px] sm:text-[48px] md:text-[64px] leading-[1.02] font-semibold tracking-tight">
+            The new economy,<br className="hidden sm:block" /> <span className="font-editorial italic font-normal">clearly explained.</span>
           </h1>
-          <p className="mt-6 md:mt-8 text-[16px] md:text-[19px] text-ink/70 leading-relaxed max-w-2xl">
-            fortyfive covers startups, technology, capital, AI, growth, markets, and new-economy stories globally — with a strong India lens.
+          <p className="mt-4 text-[15px] md:text-[17px] text-ink/70 leading-relaxed max-w-2xl">
+            fortyfive covers startups, technology, capital, AI, growth, markets, and the companies shaping what comes next.
           </p>
         </div>
 
-        <div className="mt-14 md:mt-20 grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-14 items-start">
-          <div className="md:col-span-7">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="inline-flex items-center h-6 px-2.5 rounded-md bg-signal text-white eyebrow">
-                {cat?.name}
-              </span>
-              <span className="eyebrow text-ash">Featured story</span>
-            </div>
+        <div className="mt-10 md:mt-14 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+          <div className="lg:col-span-7 border-t border-line pt-5">
+            <p className="eyebrow text-signal mb-3">TOP STORY</p>
             <Link href={`/article/${featured.slug}`} className="group block">
-              <h2 className="font-editorial text-[38px] sm:text-[48px] md:text-[60px] leading-[1.03] tracking-tight group-hover:text-signal transition-colors">
+              <h2 className="text-[34px] sm:text-[42px] md:text-[52px] leading-[1.05] font-semibold tracking-tight group-hover:text-signal transition-colors">
                 {featured.title}
               </h2>
             </Link>
-          </div>
-          <div className="md:col-span-5 md:pt-16">
-            <p className="text-[17px] md:text-[18px] text-ink/80 leading-relaxed">{featured.subtitle}</p>
-            <div className="mt-6 flex items-center gap-4 text-[13px] text-ash">
+            <p className="mt-4 text-[16px] md:text-[17px] text-ink/75 leading-relaxed max-w-2xl">{featured.subtitle}</p>
+            <div className="mt-5 flex flex-wrap items-center gap-3 text-[12px] text-ash">
+              <span className="eyebrow text-signal">{cat?.name}</span>
+              <span className="h-3 w-px bg-line" />
               <span>{featured.kind}</span>
               <span className="h-3 w-px bg-line" />
               <span>{featured.readTime}</span>
@@ -42,11 +42,29 @@ export default function Hero({ featured }) {
             </div>
             <Link
               href={`/article/${featured.slug}`}
-              className="mt-8 inline-flex items-center gap-2 text-[15px] font-medium text-ink hover:text-signal transition-colors group"
+              className="mt-6 inline-flex items-center gap-2 text-[14px] font-medium text-ink hover:text-signal transition-colors group"
             >
               Read story
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Link>
+          </div>
+
+          <div className="lg:col-span-5 border-t border-line pt-5">
+            <h2 className="text-[22px] md:text-[24px] leading-none font-semibold tracking-tight mb-1">Latest</h2>
+            <div className="divide-y divide-line">
+              {latestItems.map((article) => (
+                <Link key={article.slug} href={`/article/${article.slug}`} className="group block py-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="eyebrow text-signal">{categoryName(article)}</span>
+                    <span className="h-3 w-px bg-line" />
+                    <span className="text-[11px] text-ash">{article.readTime}</span>
+                  </div>
+                  <h3 className="text-[18px] md:text-[20px] leading-[1.16] font-semibold tracking-tight group-hover:text-signal transition-colors">
+                    {article.title}
+                  </h3>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </div>
