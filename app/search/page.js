@@ -7,6 +7,13 @@ import { getPublicArticles } from '@/lib/publicArticles';
 import { Search as SearchIcon } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
+const SEARCH_CATEGORIES = [
+  ...CATEGORIES,
+  { slug: 'markets', name: 'Markets' },
+  { slug: 'india', name: 'India' },
+  { slug: 'global', name: 'Global' },
+];
+
 export default function SearchPage() {
   const [q, setQ] = useState('');
   const [cat, setCat] = useState('all');
@@ -46,7 +53,7 @@ export default function SearchPage() {
           </div>
 
           <div className="mt-6 flex flex-wrap gap-2">
-            {[{ slug: 'all', name: 'All' }, ...CATEGORIES].map((c) => {
+            {[{ slug: 'all', name: 'All' }, ...SEARCH_CATEGORIES].map((c) => {
               const active = cat === c.slug;
               return (
                 <button

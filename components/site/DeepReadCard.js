@@ -4,7 +4,7 @@ import { ArrowUpRight } from 'lucide-react';
 
 export default function DeepReadCard({ article }) {
   const cat = CATEGORIES.find((c) => c.slug === article.category);
-  const categoryName = cat?.name || article.category;
+  const categoryName = cat?.name || article.categoryName || article.category;
   return (
     <Link
       href={`/article/${article.slug}`}

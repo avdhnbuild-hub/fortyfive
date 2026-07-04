@@ -21,6 +21,11 @@ export default function ShareBar({ article }) {
   const copyLink = () => copyText(url, 'Link copied');
 
   const nativeShare = async () => {
+    if (!canNativeShare) {
+      await copyLink();
+      return;
+    }
+
     try {
       await navigator.share({
         title: article.seoTitle || article.title,
@@ -28,7 +33,7 @@ export default function ShareBar({ article }) {
         url,
       });
     } catch {
-      // Native share was dismissed or unavailable after the initial capability check.
+      await copyLink();
     }
   };
 
@@ -66,15 +71,13 @@ export default function ShareBar({ article }) {
       >
         LinkedIn
       </a>
-      {canNativeShare && (
-        <button
-          type="button"
-          onClick={nativeShare}
-          className="inline-flex h-8 items-center rounded-full border border-line px-3 font-medium text-ink transition-colors hover:border-signal hover:text-signal"
-        >
-          Native share
-        </button>
-      )}
+      <button
+        type="button"
+        onClick={nativeShare}
+        className="inline-flex h-8 items-center rounded-full border border-line px-3 font-medium text-ink transition-colors hover:border-signal hover:text-signal"
+      >
+        Native share
+      </button>
       {article.pullQuote && (
         <button
           type="button"

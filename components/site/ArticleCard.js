@@ -3,7 +3,7 @@ import { CATEGORIES } from '@/lib/data';
 
 export default function ArticleCard({ article, variant = 'default' }) {
   const cat = CATEGORIES.find((c) => c.slug === article.category);
-  const categoryName = cat?.name || article.category;
+  const categoryName = cat?.name || article.categoryName || article.category;
   if (variant === 'row') {
     return (
       <Link href={`/article/${article.slug}`} className="group block py-6">

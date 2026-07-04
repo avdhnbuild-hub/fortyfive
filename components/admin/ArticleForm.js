@@ -66,12 +66,23 @@ export default function ArticleForm({ articleId }) {
   const save = (status) => {
     if (!article.title.trim()) return;
 
-    upsertAdminArticle({
+    const savedArticle = upsertAdminArticle({
       ...article,
       status,
       slug: article.slug || slugify(article.title),
     });
     router.push('/admin/articles');
+    return savedArticle;
+  };
+
+  const preview = () => {
+    if (!article.title.trim()) return;
+
+    const savedArticle = upsertAdminArticle({
+      ...article,
+      slug: article.slug || slugify(article.title),
+    });
+    router.push(`/admin/preview/${savedArticle.slug}`);
   };
 
   if (!ready) return null;
@@ -146,6 +157,9 @@ export default function ArticleForm({ articleId }) {
           </button>
           <button type="button" onClick={() => save('Published')} className="h-11 rounded-lg bg-[#070707] px-5 text-sm font-medium text-white hover:bg-[#ff5a1f]">
             Publish
+          </button>
+          <button type="button" onClick={preview} className="h-11 rounded-lg border border-[#e5e1da] bg-white px-5 text-sm font-medium hover:border-[#ff5a1f]">
+            Preview
           </button>
         </div>
       </form>
