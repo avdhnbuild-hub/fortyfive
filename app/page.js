@@ -97,7 +97,7 @@ export default function HomePage() {
               <p className="eyebrow text-signal mb-3">Capital</p>
               <h2 className="font-editorial text-[40px] md:text-[52px] leading-none tracking-tight">Funding</h2>
               <p className="mt-5 text-[15px] text-ink/70 leading-relaxed max-w-sm">
-                Recent capital movement across startups, AI, markets, and technology companies.
+                Explainers and analysis on what capital signals, what it hides, and what to watch after the announcement.
               </p>
               <Link href="/category/funding" className="mt-6 inline-flex items-center gap-2 text-[14px] font-medium text-ink hover:text-signal transition-colors group">
                 View more funding stories
