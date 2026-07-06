@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { deleteArticle, getAdminArticle, saveAdminArticle, uploadArticleCoverImage } from '@/lib/adminArticlesClient';
@@ -11,35 +11,203 @@ const regions = ['India', 'Global', 'Both'];
 const types = ['News', 'Analysis', 'Opinion', 'Deep Read', 'Funding'];
 const acceptedImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
 const maxImageSize = 2 * 1024 * 1024;
+const draftFields = [
+  'title',
+  'slug',
+  'subtitle',
+  'summary',
+  'category',
+  'region',
+  'type',
+  'author',
+  'date',
+  'readTime',
+  'tags',
+  'status',
+  'coverImageUrl',
+  'ogImageUrl',
+  'inBrief',
+  'pullQuote',
+  'bottomLine',
+  'seoTitle',
+  'seoDescription',
+  'bodySections',
+];
+
+function draftKeyForArticle(articleId) {
+  return articleId ? `fortyfive_admin_article_draft_${articleId}` : 'fortyfive_admin_article_draft_new';
+}
+
+function defaultArticle() {
+  return {
+    ...emptyArticle,
+    date: new Date().toISOString().slice(0, 10),
+  };
+}
+
+function articleDraftPayload(article) {
+  return draftFields.reduce((payload, field) => {
+    payload[field] = article[field] ?? emptyArticle[field] ?? '';
+    return payload;
+  }, {});
+}
+
+function normalizeDraftArticle(article) {
+  return {
+    ...defaultArticle(),
+    ...article,
+    bodySections: article.bodySections?.length ? article.bodySections : emptyArticle.bodySections,
+  };
+}
+
+function readLocalDraft(key) {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(key) || 'null');
+    if (!parsed?.article || !parsed?.savedAt) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function clearLocalDraft(key) {
+  localStorage.removeItem(key);
+}
+
+function draftIsNewerThanArticle(draft, article) {
+  if (!draft?.savedAt) return false;
+  if (!article?.updatedAt) return true;
+
+  return new Date(draft.savedAt).getTime() > new Date(article.updatedAt).getTime();
+}
 
 export default function ArticleForm({ articleId }) {
   const router = useRouter();
-  const [article, setArticle] = useState({
-    ...emptyArticle,
-    date: new Date().toISOString().slice(0, 10),
-  });
-  const [ready, setReady] = useState(!articleId);
+  const draftKey = useMemo(() => draftKeyForArticle(articleId), [articleId]);
+  const [article, setArticle] = useState(defaultArticle);
+  const [ready, setReady] = useState(false);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const initializedRef = useRef(false);
+  const baseSnapshotRef = useRef('');
+  const autosaveTimerRef = useRef(null);
 
   useEffect(() => {
-    if (!articleId) return;
+    let active = true;
 
-    getAdminArticle(articleId)
-      .then((stored) => {
+    initializedRef.current = false;
+    setReady(false);
+    setNotice('');
+    setError('');
+
+    const initializeArticle = async () => {
+      if (!articleId) {
+        const baseArticle = defaultArticle();
+        const localDraft = readLocalDraft(draftKey);
+        const nextArticle = localDraft ? normalizeDraftArticle(localDraft.article) : baseArticle;
+
+        if (!active) return;
+
+        baseSnapshotRef.current = JSON.stringify(articleDraftPayload(baseArticle));
+        setArticle(nextArticle);
+        setHasUnsavedChanges(Boolean(localDraft));
+        if (localDraft) setNotice('Unsaved draft restored.');
+        initializedRef.current = true;
+        setReady(true);
+        return;
+      }
+
+      try {
+        const stored = await getAdminArticle(articleId);
+        if (!active) return;
+
+        let nextArticle = defaultArticle();
         if (stored) {
-          setArticle({
-            ...emptyArticle,
-            ...stored,
-            bodySections: stored.bodySections?.length ? stored.bodySections : emptyArticle.bodySections,
-          });
+          nextArticle = normalizeDraftArticle(stored);
         }
-      })
-      .catch((adminError) => setError(adminError.message))
-      .finally(() => setReady(true));
-  }, [articleId]);
+
+        const localDraft = readLocalDraft(draftKey);
+        const shouldAskToRestore = localDraft && draftIsNewerThanArticle(localDraft, stored);
+
+        baseSnapshotRef.current = JSON.stringify(articleDraftPayload(nextArticle));
+
+        if (shouldAskToRestore) {
+          if (window.confirm('Restore unsaved changes from this browser?')) {
+            nextArticle = normalizeDraftArticle({
+              ...nextArticle,
+              ...localDraft.article,
+            });
+            setNotice('Unsaved draft restored.');
+            setHasUnsavedChanges(true);
+          } else {
+            clearLocalDraft(draftKey);
+            setHasUnsavedChanges(false);
+          }
+        } else {
+          if (localDraft) clearLocalDraft(draftKey);
+          setHasUnsavedChanges(false);
+        }
+
+        setArticle(nextArticle);
+      } catch (adminError) {
+        if (active) setError(adminError.message);
+      } finally {
+        if (active) {
+          initializedRef.current = true;
+          setReady(true);
+        }
+      }
+    };
+
+    initializeArticle();
+
+    return () => {
+      active = false;
+    };
+  }, [articleId, draftKey]);
+
+  useEffect(() => {
+    if (!ready || !initializedRef.current) return undefined;
+
+    const currentSnapshot = JSON.stringify(articleDraftPayload(article));
+    if (currentSnapshot === baseSnapshotRef.current) {
+      setHasUnsavedChanges(false);
+      return undefined;
+    }
+
+    setHasUnsavedChanges(true);
+    if (autosaveTimerRef.current) window.clearTimeout(autosaveTimerRef.current);
+
+    autosaveTimerRef.current = window.setTimeout(() => {
+      localStorage.setItem(
+        draftKey,
+        JSON.stringify({
+          savedAt: new Date().toISOString(),
+          article: articleDraftPayload(article),
+        })
+      );
+    }, 300);
+
+    return () => {
+      if (autosaveTimerRef.current) window.clearTimeout(autosaveTimerRef.current);
+    };
+  }, [article, draftKey, ready]);
+
+  useEffect(() => {
+    if (!hasUnsavedChanges) return undefined;
+
+    const warnBeforeUnload = (event) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+
+    window.addEventListener('beforeunload', warnBeforeUnload);
+    return () => window.removeEventListener('beforeunload', warnBeforeUnload);
+  }, [hasUnsavedChanges]);
 
   const updateField = (field, value) => {
     setArticle((current) => {
@@ -130,6 +298,9 @@ export default function ArticleForm({ articleId }) {
         status,
         slug: article.slug || slugify(article.title),
       });
+      if (autosaveTimerRef.current) window.clearTimeout(autosaveTimerRef.current);
+      clearLocalDraft(draftKey);
+      setHasUnsavedChanges(false);
       router.push('/admin/articles');
       return savedArticle;
     } catch (adminError) {
@@ -162,6 +333,9 @@ export default function ArticleForm({ articleId }) {
 
     try {
       await deleteArticle(articleId);
+      if (autosaveTimerRef.current) window.clearTimeout(autosaveTimerRef.current);
+      clearLocalDraft(draftKey);
+      setHasUnsavedChanges(false);
       router.push('/admin/articles');
     } catch (adminError) {
       setError(adminError.message || 'Could not delete article.');
@@ -274,6 +448,7 @@ export default function ArticleForm({ articleId }) {
         </section>
 
         {error && <p className="text-sm text-[#ff5a1f]">{error}</p>}
+        {notice && <p className="text-sm text-[#666666]">{notice}</p>}
 
         <div className="flex flex-wrap gap-3">
           <button type="button" onClick={() => save('Draft')} className="h-11 rounded-lg border border-[#e5e1da] bg-white px-5 text-sm font-medium hover:border-[#ff5a1f]">
