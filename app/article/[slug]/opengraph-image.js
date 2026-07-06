@@ -8,6 +8,8 @@ export const size = {
 };
 
 export const contentType = 'image/png';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 function categoryName(article) {
   return CATEGORIES.find((category) => category.slug === article.category)?.name || article.categoryName || article.category;

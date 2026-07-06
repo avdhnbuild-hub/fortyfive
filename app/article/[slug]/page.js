@@ -1,12 +1,10 @@
 import ArticleDetailContent from '@/components/site/ArticleDetailContent';
-import { ARTICLES } from '@/lib/data';
 import { getPublishedArticleBySlug, getPublishedArticles } from '@/lib/articlesDb';
 
 const DEFAULT_OG_IMAGE = '/og-default.png';
 
-export function generateStaticParams() {
-  return ARTICLES.map((a) => ({ slug: a.slug }));
-}
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
