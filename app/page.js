@@ -7,12 +7,16 @@ import CategoryCard from '@/components/site/CategoryCard';
 import FundingCard from '@/components/site/FundingCard';
 import NewsletterCTA from '@/components/site/NewsletterCTA';
 import SectionHeader from '@/components/site/SectionHeader';
-import { CATEGORIES, FUNDING } from '@/lib/data';
+import { ARTICLES, CATEGORIES, FUNDING } from '@/lib/data';
 import { getPublishedArticles } from '@/lib/articlesDb';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
 const description = 'fortyfive covers startups, technology, capital, AI, growth, markets, and the companies shaping what comes next.';
+const pinnedHomepageSlug = 'why-most-startup-news-is-hard-to-use';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export const metadata = {
   title: {
@@ -45,11 +49,23 @@ export const metadata = {
   },
 };
 
+function dedupeBySlug(articles = []) {
+  const seen = new Set();
+
+  return articles.filter((article) => {
+    if (!article?.slug || seen.has(article.slug)) return false;
+    seen.add(article.slug);
+    return true;
+  });
+}
+
 export default async function HomePage() {
   const articles = await getPublishedArticles();
-  const featured = articles[0];
-  const latest = articles.filter((article) => article.slug !== featured?.slug).slice(0, 8);
-  const deep = articles.filter((article) => article.deepRead);
+  const pinnedArticle = ARTICLES.find((article) => article.slug === pinnedHomepageSlug);
+  const homepageArticles = dedupeBySlug(pinnedArticle ? [pinnedArticle, ...articles] : articles);
+  const featured = homepageArticles[0];
+  const latest = homepageArticles.filter((article) => article.slug !== featured?.slug).slice(0, 8);
+  const deep = homepageArticles.filter((article) => article.deepRead);
 
   if (!featured) {
     return (
