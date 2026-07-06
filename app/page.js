@@ -7,8 +7,8 @@ import CategoryCard from '@/components/site/CategoryCard';
 import FundingCard from '@/components/site/FundingCard';
 import NewsletterCTA from '@/components/site/NewsletterCTA';
 import SectionHeader from '@/components/site/SectionHeader';
-import CmsArticleCards from '@/components/site/CmsArticleCards';
-import { getFeatured, getLatest, getDeepReads, CATEGORIES, FUNDING } from '@/lib/data';
+import { CATEGORIES, FUNDING } from '@/lib/data';
+import { getPublishedArticles } from '@/lib/articlesDb';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
@@ -45,10 +45,11 @@ export const metadata = {
   },
 };
 
-export default function HomePage() {
-  const featured = getFeatured();
-  const latest = getLatest(8);
-  const deep = getDeepReads();
+export default async function HomePage() {
+  const articles = await getPublishedArticles();
+  const featured = articles[0];
+  const latest = articles.filter((article) => article.slug !== featured?.slug).slice(0, 8);
+  const deep = articles.filter((article) => article.deepRead);
 
   return (
     <div className="min-h-screen flex flex-col bg-paper">
@@ -63,7 +64,6 @@ export default function HomePage() {
             {latest.map((a) => (
               <ArticleCard key={a.slug} article={a} />
             ))}
-            <CmsArticleCards excludeSlugs={latest.map((a) => a.slug)} />
           </div>
         </section>
 
@@ -86,7 +86,6 @@ export default function HomePage() {
             {deep.slice(0, 3).map((a) => (
               <DeepReadCard key={a.slug} article={a} />
             ))}
-            <CmsArticleCards deepOnly card="deep" excludeSlugs={deep.map((a) => a.slug)} />
           </div>
         </section>
 

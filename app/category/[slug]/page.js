@@ -2,10 +2,9 @@ import Header from '@/components/site/Header';
 import Footer from '@/components/site/Footer';
 import ArticleCard from '@/components/site/ArticleCard';
 import DeepReadCard from '@/components/site/DeepReadCard';
-import CmsArticleCards from '@/components/site/CmsArticleCards';
-import CmsCategorySection from '@/components/site/CmsCategorySection';
 import NewsletterCTA from '@/components/site/NewsletterCTA';
-import { CATEGORIES, getArticlesByCategory, getCategory } from '@/lib/data';
+import { CATEGORIES, getCategory } from '@/lib/data';
+import { getArticlesByCategory } from '@/lib/articlesDb';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
@@ -35,7 +34,7 @@ export default async function CategoryPage({ params }) {
   const { slug } = await params;
   const category = getPageCategory(slug);
   if (!category) notFound();
-  const articles = getArticlesByCategory(slug);
+  const articles = await getArticlesByCategory(slug);
   const featured = articles[0];
   const rest = articles.slice(1);
   const deep = articles.filter((a) => a.deepRead);
@@ -76,13 +75,8 @@ export default async function CategoryPage({ params }) {
               {rest.map((a) => (
                 <ArticleCard key={a.slug} article={a} />
               ))}
-              <CmsArticleCards category={slug} excludeSlugs={articles.map((a) => a.slug)} />
             </div>
           </section>
-        )}
-
-        {rest.length === 0 && (
-          <CmsCategorySection category={slug} categoryName={category.name} excludeSlugs={articles.map((a) => a.slug)} />
         )}
 
         {deep.length > 0 && (
@@ -94,7 +88,6 @@ export default async function CategoryPage({ params }) {
                 {deep.map((a) => (
                   <DeepReadCard key={a.slug} article={a} />
                 ))}
-                <CmsArticleCards category={slug} deepOnly card="deep" excludeSlugs={deep.map((a) => a.slug)} />
               </div>
             </div>
           </section>

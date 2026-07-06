@@ -1,33 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Header from '@/components/site/Header';
 import Footer from '@/components/site/Footer';
 import NewsletterCTA from '@/components/site/NewsletterCTA';
 import ArticleCard from '@/components/site/ArticleCard';
 import ShareBar from '@/components/site/ShareBar';
-import { ARTICLES, CATEGORIES } from '@/lib/data';
-import { getPublishedCmsArticles } from '@/lib/publicArticles';
+import { CATEGORIES } from '@/lib/data';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
-export default function ArticleDetailContent({ initialArticle, slug }) {
-  const [article, setArticle] = useState(initialArticle);
-  const [ready, setReady] = useState(Boolean(initialArticle));
-  const [allArticles, setAllArticles] = useState(ARTICLES);
-
-  useEffect(() => {
-    const cmsArticles = getPublishedCmsArticles();
-    setAllArticles([...cmsArticles, ...ARTICLES]);
-
-    if (!initialArticle) {
-      setArticle(cmsArticles.find((item) => item.slug === slug));
-    }
-
-    setReady(true);
-  }, [initialArticle, slug]);
-
-  if (!ready) return null;
+export default function ArticleDetailContent({ initialArticle, initialArticles = [] }) {
+  const article = initialArticle;
 
   if (!article) {
     return (
@@ -47,8 +30,8 @@ export default function ArticleDetailContent({ initialArticle, slug }) {
   }
 
   const cat = CATEGORIES.find((c) => c.slug === article.category);
-  const categoryName = cat?.name || article.category;
-  const related = allArticles
+  const categoryName = cat?.name || article.categoryName || article.category;
+  const related = initialArticles
     .filter((item) => item.slug !== article.slug && item.category === article.category)
     .slice(0, 3);
 
@@ -86,7 +69,7 @@ export default function ArticleDetailContent({ initialArticle, slug }) {
           )}
 
           <div className="article-body mt-12">
-            {article.body.map((block, i) => {
+            {(article.body || []).map((block, i) => {
               if (block.type === 'h2') return <h2 key={i}>{block.text}</h2>;
               if (block.type === 'h3') return <h3 key={i}>{block.text}</h3>;
               if (block.type === 'blockquote') return <blockquote key={i}>{block.text}</blockquote>;

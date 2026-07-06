@@ -1,5 +1,6 @@
 import ArticleDetailContent from '@/components/site/ArticleDetailContent';
-import { ARTICLES, getArticleBySlug } from '@/lib/data';
+import { ARTICLES } from '@/lib/data';
+import { getPublishedArticleBySlug, getPublishedArticles } from '@/lib/articlesDb';
 
 export function generateStaticParams() {
   return ARTICLES.map((a) => ({ slug: a.slug }));
@@ -7,7 +8,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
+  const article = await getPublishedArticleBySlug(slug);
   if (!article) return { title: 'Story not found: fortyfive' };
   const description = article.seoDescription || article.summary || article.subtitle;
   const url = `/article/${article.slug}`;
@@ -47,6 +48,7 @@ export async function generateMetadata({ params }) {
 
 export default async function ArticlePage({ params }) {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
-  return <ArticleDetailContent initialArticle={article} slug={slug} />;
+  const article = await getPublishedArticleBySlug(slug);
+  const articles = await getPublishedArticles();
+  return <ArticleDetailContent initialArticle={article} initialArticles={articles} slug={slug} />;
 }
