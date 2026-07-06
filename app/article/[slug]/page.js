@@ -11,6 +11,7 @@ export async function generateMetadata({ params }) {
   const article = await getPublishedArticleBySlug(slug);
   if (!article) return { title: 'Story not found: fortyfive' };
   const description = article.seoDescription || article.summary || article.subtitle;
+  const image = article.ogImageUrl || article.coverImageUrl || '/og-image.svg';
   const url = `/article/${article.slug}`;
 
   return {
@@ -30,7 +31,7 @@ export async function generateMetadata({ params }) {
       section: article.category,
       images: [
         {
-          url: '/og-image.svg',
+          url: image,
           width: 1200,
           height: 630,
           alt: article.title,
@@ -41,7 +42,7 @@ export async function generateMetadata({ params }) {
       card: 'summary_large_image',
       title: article.seoTitle || article.title,
       description,
-      images: ['/og-image.svg'],
+      images: [image],
     },
   };
 }

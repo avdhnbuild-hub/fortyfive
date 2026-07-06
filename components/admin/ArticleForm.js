@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getAdminArticle, saveAdminArticle } from '@/lib/adminArticlesClient';
+import { getAdminArticle, saveAdminArticle, uploadArticleCoverImage } from '@/lib/adminArticlesClient';
 import { emptyArticle, slugify } from '@/lib/adminStore';
 
 const categories = ['Startups', 'Technology', 'AI', 'Funding', 'Growth', 'Markets', 'India', 'Global', 'Opinion'];
 const regions = ['India', 'Global', 'Both'];
 const types = ['News', 'Analysis', 'Opinion', 'Deep Read', 'Funding'];
+const acceptedImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
+const maxImageSize = 2 * 1024 * 1024;
 
 export default function ArticleForm({ articleId }) {
   const router = useRouter();
@@ -17,6 +19,8 @@ export default function ArticleForm({ articleId }) {
   });
   const [ready, setReady] = useState(!articleId);
   const [error, setError] = useState('');
+  const [imageFile, setImageFile] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
     if (!articleId) return;
@@ -66,6 +70,52 @@ export default function ArticleForm({ articleId }) {
       ...current,
       bodySections: current.bodySections.filter((_, sectionIndex) => sectionIndex !== index),
     }));
+  };
+
+  const selectCoverImage = (file) => {
+    setError('');
+
+    if (!file) {
+      setImageFile(null);
+      return;
+    }
+
+    if (!acceptedImageTypes.includes(file.type)) {
+      setImageFile(null);
+      setError('Cover image must be a JPG, PNG, or WebP file.');
+      return;
+    }
+
+    if (file.size > maxImageSize) {
+      setImageFile(null);
+      setError('Cover image must be 2MB or smaller.');
+      return;
+    }
+
+    setImageFile(file);
+  };
+
+  const uploadCoverImage = async () => {
+    if (!imageFile) return;
+
+    const nextSlug = article.slug || slugify(article.title);
+    if (!nextSlug) {
+      setError('Add a title or slug before uploading a cover image.');
+      return;
+    }
+
+    setError('');
+    setUploadingImage(true);
+
+    try {
+      const publicUrl = await uploadArticleCoverImage(imageFile, nextSlug);
+      updateField('coverImageUrl', publicUrl);
+      setImageFile(null);
+    } catch (adminError) {
+      setError(adminError.message);
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const save = async (status) => {
@@ -129,6 +179,39 @@ export default function ArticleForm({ articleId }) {
           <Field label="Cover image URL" value={article.coverImageUrl} onChange={(value) => updateField('coverImageUrl', value)} />
           <Field label="OG image URL" value={article.ogImageUrl} onChange={(value) => updateField('ogImageUrl', value)} />
         </div>
+
+        <section className="rounded-xl border border-[#e5e1da] bg-white p-5">
+          <div className="grid gap-5 md:grid-cols-2">
+            <div>
+              <h2 className="text-xl font-semibold">Cover image</h2>
+              <p className="mt-1 text-sm text-[#666666]">Upload a JPG, PNG, or WebP image up to 2MB.</p>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={(event) => selectCoverImage(event.target.files?.[0])}
+                className="mt-4 block w-full text-sm text-[#666666] file:mr-4 file:rounded-lg file:border file:border-[#e5e1da] file:bg-white file:px-3 file:py-2 file:text-sm file:font-medium file:text-[#070707] hover:file:border-[#ff5a1f]"
+              />
+              <button
+                type="button"
+                onClick={uploadCoverImage}
+                disabled={!imageFile || uploadingImage}
+                className="mt-4 h-11 rounded-lg border border-[#e5e1da] bg-white px-5 text-sm font-medium hover:border-[#ff5a1f] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {uploadingImage ? 'Uploading...' : 'Upload image'}
+              </button>
+            </div>
+            {article.coverImageUrl && (
+              <div>
+                <p className="text-sm font-medium">Preview</p>
+                <img
+                  src={article.coverImageUrl}
+                  alt=""
+                  className="mt-3 aspect-[16/9] w-full rounded-lg border border-[#e5e1da] object-cover"
+                />
+              </div>
+            )}
+          </div>
+        </section>
 
         <div className="grid gap-4 md:grid-cols-2">
           <Field label="In brief" value={article.inBrief} onChange={(value) => updateField('inBrief', value)} multiline />

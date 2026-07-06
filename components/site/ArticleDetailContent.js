@@ -61,6 +61,14 @@ export default function ArticleDetailContent({ initialArticle, initialArticles =
 
           <ShareBar article={article} />
 
+          {article.coverImageUrl && (
+            <img
+              src={article.coverImageUrl}
+              alt=""
+              className="mt-10 aspect-[16/9] w-full rounded-xl object-cover"
+            />
+          )}
+
           {article.inBrief && (
             <div className="mt-10 p-6 md:p-7 bg-white border-l-2 border-signal rounded-r-lg">
               <p className="eyebrow text-signal mb-2">In brief</p>
