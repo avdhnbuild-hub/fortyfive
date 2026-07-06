@@ -6,7 +6,7 @@ export default function ArticleCard({ article, variant = 'default' }) {
   const categoryName = cat?.name || article.categoryName || article.category;
   if (variant === 'row') {
     return (
-      <Link href={`/article/${article.slug}`} className="group block py-6">
+      <Link href={`/article/${article.slug}`} className="focus-ring group block rounded-sm py-6">
         <div className="flex items-baseline gap-3 mb-2">
           <span className="eyebrow text-signal">{categoryName}</span>
           <span className="text-[11px] text-ash">{article.date} · {article.readTime}</span>
@@ -20,8 +20,9 @@ export default function ArticleCard({ article, variant = 'default' }) {
   }
 
   return (
-    <Link href={`/article/${article.slug}`} className="group block">
+    <Link href={`/article/${article.slug}`} className="focus-ring group block rounded-sm">
       <div className="flex items-center gap-3 mb-3">
+        <span className="orange-dot h-[5px] w-[5px] transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
         <span className="eyebrow text-signal">{categoryName}</span>
         <span className="h-3 w-px bg-line" />
         <span className="text-[11px] text-ash">{article.readTime}</span>

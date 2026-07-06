@@ -29,7 +29,7 @@ export default function AdminShell({ children }) {
       <div className="min-h-screen bg-[#f6f6f3] text-[#070707]">
         <header className="border-b border-[#e5e1da] bg-white">
           <div className="mx-auto flex max-w-6xl flex-col gap-4 px-5 py-5 md:flex-row md:items-center md:justify-between">
-            <Link href="/admin" className="flex items-baseline gap-1">
+            <Link href="/admin" className="focus-ring flex items-baseline gap-1 rounded-sm">
               <span className="text-2xl font-semibold tracking-tight">fortyfive admin</span>
               <span className="h-2 w-2 rounded-full bg-[#ff5a1f]" />
             </Link>
@@ -40,12 +40,13 @@ export default function AdminShell({ children }) {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`rounded-full border px-3 py-2 transition-colors ${
+                    className={`focus-ring inline-flex items-center gap-2 rounded-full border px-3 py-2 transition-colors ${
                       active
                         ? 'border-[#070707] bg-[#070707] text-white'
                         : 'border-[#e5e1da] bg-white text-[#666666] hover:border-[#ff5a1f] hover:text-[#070707]'
                     }`}
                   >
+                    {active && <span className="h-1.5 w-1.5 rounded-full bg-[#ff5a1f]" aria-hidden="true" />}
                     {item.label}
                   </Link>
                 );
@@ -53,7 +54,7 @@ export default function AdminShell({ children }) {
               <button
                 type="button"
                 onClick={logout}
-                className="rounded-full border border-[#e5e1da] bg-white px-3 py-2 text-[#666666] transition-colors hover:border-[#ff5a1f] hover:text-[#070707]"
+                className="focus-ring rounded-full border border-[#e5e1da] bg-white px-3 py-2 text-[#666666] transition-colors hover:border-[#ff5a1f] hover:text-[#070707]"
               >
                 Log out
               </button>

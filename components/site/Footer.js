@@ -12,6 +12,12 @@ export default function Footer() {
           <p className="mt-6 text-white/70 max-w-md text-[15px] leading-relaxed">
             Startups, technology, capital, and growth. Clear stories without the noise.
           </p>
+          <a
+            href="mailto:fortyfive.build@gmail.com"
+            className="focus-ring mt-5 inline-flex rounded-sm text-[14px] text-white/75 transition-colors hover:text-signal"
+          >
+            fortyfive.build@gmail.com
+          </a>
           <p className="mt-6 text-signal eyebrow">Sharp reporting for founders and operators.</p>
         </div>
 
@@ -22,7 +28,7 @@ export default function Footer() {
               <li key={s}>
                 <Link
                   href={`/category/${s.toLowerCase()}`}
-                  className="text-white/80 hover:text-signal transition-colors"
+                  className="focus-ring rounded-sm text-white/80 hover:text-signal transition-colors"
                 >
                   {s}
                 </Link>
@@ -34,18 +40,18 @@ export default function Footer() {
         <div className="md:col-span-2">
           <p className="eyebrow text-white/50 mb-4">fortyfive</p>
           <ul className="space-y-2 text-[15px]">
-            <li><Link href="/about" className="text-white/80 hover:text-signal transition-colors">About</Link></li>
-            <li><Link href="/subscribe" className="text-white/80 hover:text-signal transition-colors">Newsletter</Link></li>
-            <li><Link href="/search" className="text-white/80 hover:text-signal transition-colors">Search</Link></li>
+            <li><Link href="/about" className="focus-ring rounded-sm text-white/80 hover:text-signal transition-colors">About</Link></li>
+            <li><Link href="/subscribe" className="focus-ring rounded-sm text-white/80 hover:text-signal transition-colors">Newsletter</Link></li>
+            <li><Link href="/search" className="focus-ring rounded-sm text-white/80 hover:text-signal transition-colors">Search</Link></li>
           </ul>
         </div>
 
         <div className="md:col-span-2">
           <p className="eyebrow text-white/50 mb-4">Follow</p>
           <ul className="space-y-2 text-[15px]">
-            <li><a href="#" className="text-white/80 hover:text-signal transition-colors">Twitter</a></li>
-            <li><a href="#" className="text-white/80 hover:text-signal transition-colors">LinkedIn</a></li>
-            <li><a href="#" className="text-white/80 hover:text-signal transition-colors">RSS</a></li>
+            <li><a href="#" className="focus-ring rounded-sm text-white/80 hover:text-signal transition-colors">Twitter</a></li>
+            <li><a href="#" className="focus-ring rounded-sm text-white/80 hover:text-signal transition-colors">LinkedIn</a></li>
+            <li><a href="#" className="focus-ring rounded-sm text-white/80 hover:text-signal transition-colors">RSS</a></li>
           </ul>
         </div>
       </div>

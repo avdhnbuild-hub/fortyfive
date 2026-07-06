@@ -15,6 +15,19 @@ html, body {
   font-family: var(--font-inter);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 ::selection {
   background: #FF5A1F;
   color: #fff;
@@ -44,6 +57,45 @@ html, body {
 }
 .link-underline:hover {
   background-size: 100% 1px;
+}
+
+.focus-ring {
+  outline: none;
+}
+.focus-ring:focus-visible {
+  box-shadow: 0 0 0 3px rgba(255, 90, 31, 0.22);
+}
+
+.quiet-surface {
+  transition: border-color .2s ease, color .2s ease, background-color .2s ease, transform .2s ease;
+}
+
+.quiet-surface:hover {
+  transform: translateY(-1px);
+}
+
+.orange-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #FF5A1F;
+  flex: 0 0 auto;
+}
+
+@keyframes dot-soft-pulse {
+  0%, 100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.28);
+  }
+}
+
+.dot-pulse {
+  animation: dot-soft-pulse 1.4s ease-in-out infinite;
 }
 
 .article-body p {

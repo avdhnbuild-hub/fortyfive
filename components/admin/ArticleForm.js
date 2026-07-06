@@ -88,9 +88,11 @@ export default function ArticleForm({ articleId }) {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [noticeType, setNoticeType] = useState('info');
   const [imageFile, setImageFile] = useState(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [savingAction, setSavingAction] = useState('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const initializedRef = useRef(false);
   const baseSnapshotRef = useRef('');
@@ -102,6 +104,7 @@ export default function ArticleForm({ articleId }) {
     initializedRef.current = false;
     setReady(false);
     setNotice('');
+    setNoticeType('info');
     setError('');
 
     const initializeArticle = async () => {
@@ -115,7 +118,10 @@ export default function ArticleForm({ articleId }) {
         baseSnapshotRef.current = JSON.stringify(articleDraftPayload(baseArticle));
         setArticle(nextArticle);
         setHasUnsavedChanges(Boolean(localDraft));
-        if (localDraft) setNotice('Unsaved draft restored.');
+        if (localDraft) {
+          setNotice('Unsaved draft restored.');
+          setNoticeType('info');
+        }
         initializedRef.current = true;
         setReady(true);
         return;
@@ -142,6 +148,7 @@ export default function ArticleForm({ articleId }) {
               ...localDraft.article,
             });
             setNotice('Unsaved draft restored.');
+            setNoticeType('info');
             setHasUnsavedChanges(true);
           } else {
             clearLocalDraft(draftKey);
@@ -244,6 +251,7 @@ export default function ArticleForm({ articleId }) {
 
   const selectCoverImage = (file) => {
     setError('');
+    setNotice('');
 
     if (!file) {
       setImageFile(null);
@@ -275,22 +283,30 @@ export default function ArticleForm({ articleId }) {
     }
 
     setError('');
+    setNotice('');
     setUploadingImage(true);
 
     try {
       const publicUrl = await uploadArticleCoverImage(imageFile, nextSlug);
       updateField('coverImageUrl', publicUrl);
       setImageFile(null);
+      setNotice('Cover image uploaded.');
+      setNoticeType('success');
     } catch (adminError) {
-      setError(adminError.message);
+      setError(adminError.message || 'Could not upload the cover image.');
     } finally {
       setUploadingImage(false);
     }
   };
 
   const save = async (status) => {
-    if (!article.title.trim()) return;
+    if (!article.title.trim()) {
+      setError('Add a title before saving this article.');
+      return null;
+    }
     setError('');
+    setNotice('');
+    setSavingAction(status);
 
     try {
       const savedArticle = await saveAdminArticle({
@@ -301,17 +317,27 @@ export default function ArticleForm({ articleId }) {
       if (autosaveTimerRef.current) window.clearTimeout(autosaveTimerRef.current);
       clearLocalDraft(draftKey);
       setHasUnsavedChanges(false);
-      router.push('/admin/articles');
+      baseSnapshotRef.current = JSON.stringify(articleDraftPayload({ ...article, status, slug: savedArticle.slug }));
+      setNotice(status === 'Published' ? 'Successfully published.' : articleId ? 'Changes saved.' : 'Draft saved.');
+      setNoticeType('success');
+      window.setTimeout(() => router.push('/admin/articles'), status === 'Published' ? 1200 : 700);
       return savedArticle;
     } catch (adminError) {
-      setError(adminError.message);
+      setError(adminError.message || (status === 'Published' ? 'Could not publish this article.' : 'Could not save this article.'));
       return null;
+    } finally {
+      setSavingAction('');
     }
   };
 
   const preview = async () => {
-    if (!article.title.trim()) return;
+    if (!article.title.trim()) {
+      setError('Add a title before previewing this article.');
+      return;
+    }
     setError('');
+    setNotice('');
+    setSavingAction('Preview');
 
     try {
       const savedArticle = await saveAdminArticle({
@@ -320,7 +346,9 @@ export default function ArticleForm({ articleId }) {
       });
       router.push(`/admin/preview/${savedArticle.slug}`);
     } catch (adminError) {
-      setError(adminError.message);
+      setError(adminError.message || 'Could not prepare the preview.');
+    } finally {
+      setSavingAction('');
     }
   };
 
@@ -329,6 +357,7 @@ export default function ArticleForm({ articleId }) {
     if (!window.confirm('Delete this article permanently? This cannot be undone.')) return;
 
     setError('');
+    setNotice('');
     setDeleting(true);
 
     try {
@@ -343,15 +372,45 @@ export default function ArticleForm({ articleId }) {
     }
   };
 
-  if (!ready) return <p className="text-sm text-[#666666]">Loading article...</p>;
+  if (!ready) {
+    return (
+      <div className="rounded-xl border border-[#e5e1da] bg-white p-6">
+        <div className="flex items-center gap-3 text-sm text-[#666666]">
+          <span className="orange-dot dot-pulse" aria-hidden="true" />
+          Loading article...
+        </div>
+      </div>
+    );
+  }
+
+  const isBusy = Boolean(savingAction) || uploadingImage || deleting;
+  const statusIsPublished = article.status === 'Published';
 
   return (
     <div className="space-y-8">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#ff5a1f]">Editor</p>
-        <h1 className="mt-2 text-4xl font-semibold tracking-tight">
-          {articleId ? 'Edit article' : 'Create article'}
-        </h1>
+      <div className="flex flex-col gap-4 border-b border-[#e5e1da] pb-6 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#ff5a1f]">Editor</p>
+          <h1 className="mt-2 text-4xl font-semibold tracking-tight">
+            {articleId ? 'Edit article' : 'Create article'}
+          </h1>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium ${
+            statusIsPublished
+              ? 'border-[#ffd8c8] bg-[#fff7f3] text-[#9d3510]'
+              : 'border-[#e5e1da] bg-white text-[#666666]'
+          }`}>
+            <span className={`h-2 w-2 rounded-full ${statusIsPublished ? 'bg-[#ff5a1f]' : 'bg-[#b8b0a6]'}`} aria-hidden="true" />
+            {statusIsPublished ? 'Published' : 'Draft'}
+          </span>
+          {hasUnsavedChanges && (
+            <span className="inline-flex items-center gap-2 rounded-full border border-[#e5e1da] bg-white px-3 py-1.5 text-xs font-medium text-[#666666]">
+              <span className="orange-dot h-1.5 w-1.5" aria-hidden="true" />
+              Unsaved changes
+            </span>
+          )}
+        </div>
       </div>
 
       <form className="space-y-6" onSubmit={(event) => event.preventDefault()}>
@@ -372,7 +431,7 @@ export default function ArticleForm({ articleId }) {
           <Field label="OG image URL" value={article.ogImageUrl} onChange={(value) => updateField('ogImageUrl', value)} />
         </div>
 
-        <section className="rounded-xl border border-[#e5e1da] bg-white p-5">
+        <section className="rounded-xl border border-[#e5e1da] bg-white p-5 shadow-[0_1px_0_rgba(7,7,7,0.03)]">
           <div className="grid gap-5 md:grid-cols-2">
             <div>
               <h2 className="text-xl font-semibold">Cover image</h2>
@@ -381,13 +440,13 @@ export default function ArticleForm({ articleId }) {
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
                 onChange={(event) => selectCoverImage(event.target.files?.[0])}
-                className="mt-4 block w-full text-sm text-[#666666] file:mr-4 file:rounded-lg file:border file:border-[#e5e1da] file:bg-white file:px-3 file:py-2 file:text-sm file:font-medium file:text-[#070707] hover:file:border-[#ff5a1f]"
+                className="focus-ring mt-4 block w-full rounded-lg text-sm text-[#666666] file:mr-4 file:rounded-lg file:border file:border-[#e5e1da] file:bg-white file:px-3 file:py-2 file:text-sm file:font-medium file:text-[#070707] hover:file:border-[#ff5a1f]"
               />
               <button
                 type="button"
                 onClick={uploadCoverImage}
                 disabled={!imageFile || uploadingImage}
-                className="mt-4 h-11 rounded-lg border border-[#e5e1da] bg-white px-5 text-sm font-medium hover:border-[#ff5a1f] disabled:cursor-not-allowed disabled:opacity-50"
+                className="focus-ring mt-4 h-11 rounded-lg border border-[#e5e1da] bg-white px-5 text-sm font-medium transition-colors hover:border-[#ff5a1f] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {uploadingImage ? 'Uploading...' : 'Upload image'}
               </button>
@@ -416,24 +475,24 @@ export default function ArticleForm({ articleId }) {
           <Field label="SEO description" value={article.seoDescription} onChange={(value) => updateField('seoDescription', value)} multiline />
         </div>
 
-        <section className="rounded-xl border border-[#e5e1da] bg-white p-5">
+        <section className="rounded-xl border border-[#e5e1da] bg-white p-5 shadow-[0_1px_0_rgba(7,7,7,0.03)]">
           <div className="flex items-center justify-between gap-4">
             <div>
               <h2 className="text-xl font-semibold">Body sections</h2>
               <p className="mt-1 text-sm text-[#666666]">Each body textarea can contain multiple paragraphs.</p>
             </div>
-            <button type="button" onClick={addSection} className="rounded-lg border border-[#e5e1da] px-3 py-2 text-sm font-medium hover:border-[#ff5a1f]">
+            <button type="button" onClick={addSection} className="focus-ring rounded-lg border border-[#e5e1da] px-3 py-2 text-sm font-medium transition-colors hover:border-[#ff5a1f]">
               Add section
             </button>
           </div>
 
           <div className="mt-5 space-y-5">
             {article.bodySections.map((section, index) => (
-              <div key={index} className="rounded-lg border border-[#e5e1da] p-4">
+              <div key={index} className="rounded-lg border border-[#e5e1da] bg-[#fbfaf7] p-4">
                 <div className="flex items-center justify-between gap-4">
                   <p className="text-sm font-semibold">Section {index + 1}</p>
                   {article.bodySections.length > 1 && (
-                    <button type="button" onClick={() => removeSection(index)} className="text-sm text-[#ff5a1f] hover:text-[#070707]">
+                    <button type="button" onClick={() => removeSection(index)} className="focus-ring rounded-sm text-sm text-[#ff5a1f] transition-colors hover:text-[#070707]">
                       Remove
                     </button>
                   )}
@@ -447,25 +506,57 @@ export default function ArticleForm({ articleId }) {
           </div>
         </section>
 
-        {error && <p className="text-sm text-[#ff5a1f]">{error}</p>}
-        {notice && <p className="text-sm text-[#666666]">{notice}</p>}
+        {error && (
+          <div role="alert" className="rounded-lg border border-[#ffd8c8] bg-[#fff7f3] px-4 py-3 text-sm text-[#9d3510]">
+            {error}
+          </div>
+        )}
+        {notice && (
+          <div
+            role="status"
+            className={`flex items-center gap-2 rounded-lg border px-4 py-3 text-sm ${
+              noticeType === 'success'
+                ? 'border-[#ffd8c8] bg-[#fff7f3] text-[#59301e]'
+                : 'border-[#e5e1da] bg-white text-[#666666]'
+            }`}
+          >
+            <span className={`orange-dot h-1.5 w-1.5 ${savingAction ? 'dot-pulse' : ''}`} aria-hidden="true" />
+            {notice}
+          </div>
+        )}
 
-        <div className="flex flex-wrap gap-3">
-          <button type="button" onClick={() => save('Draft')} className="h-11 rounded-lg border border-[#e5e1da] bg-white px-5 text-sm font-medium hover:border-[#ff5a1f]">
-            Save Draft
+        <div className="sticky bottom-0 -mx-5 flex flex-wrap gap-3 border-t border-[#e5e1da] bg-[#f6f6f3]/95 px-5 py-4 backdrop-blur md:static md:mx-0 md:border-t-0 md:bg-transparent md:p-0 md:backdrop-blur-0">
+          <button
+            type="button"
+            onClick={() => save('Draft')}
+            disabled={isBusy}
+            className="focus-ring h-11 rounded-lg border border-[#e5e1da] bg-white px-5 text-sm font-medium transition-colors hover:border-[#ff5a1f] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {savingAction === 'Draft' ? 'Saving...' : 'Save Draft'}
           </button>
-          <button type="button" onClick={() => save('Published')} className="h-11 rounded-lg bg-[#070707] px-5 text-sm font-medium text-white hover:bg-[#ff5a1f]">
-            Publish
+          <button
+            type="button"
+            onClick={() => save('Published')}
+            disabled={isBusy}
+            className="focus-ring inline-flex h-11 items-center gap-2 rounded-lg bg-[#070707] px-5 text-sm font-medium text-white transition-colors hover:bg-[#ff5a1f] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {savingAction === 'Published' && <span className="orange-dot h-1.5 w-1.5 bg-white dot-pulse" aria-hidden="true" />}
+            {savingAction === 'Published' ? 'Publishing...' : 'Publish'}
           </button>
-          <button type="button" onClick={preview} className="h-11 rounded-lg border border-[#e5e1da] bg-white px-5 text-sm font-medium hover:border-[#ff5a1f]">
-            Preview
+          <button
+            type="button"
+            onClick={preview}
+            disabled={isBusy}
+            className="focus-ring h-11 rounded-lg border border-[#e5e1da] bg-white px-5 text-sm font-medium transition-colors hover:border-[#ff5a1f] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {savingAction === 'Preview' ? 'Preparing...' : 'Preview'}
           </button>
           {articleId && (
             <button
               type="button"
               onClick={removeArticle}
               disabled={deleting}
-              className="h-11 rounded-lg border border-[#e5e1da] bg-white px-5 text-sm font-medium hover:border-[#ff5a1f] disabled:cursor-not-allowed disabled:opacity-50"
+              className="focus-ring h-11 rounded-lg border border-[#e5e1da] bg-white px-5 text-sm font-medium transition-colors hover:border-[#ff5a1f] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {deleting ? 'Deleting...' : 'Delete'}
             </button>
@@ -477,7 +568,7 @@ export default function ArticleForm({ articleId }) {
 }
 
 function Field({ label, value, onChange, multiline = false, rows = 3, required = false, type = 'text', placeholder = '' }) {
-  const sharedClass = 'mt-2 w-full rounded-lg border border-[#e5e1da] bg-white px-3 text-sm outline-none focus:border-[#070707]';
+  const sharedClass = 'focus-ring mt-2 w-full rounded-lg border border-[#e5e1da] bg-white px-3 text-sm outline-none transition-colors focus:border-[#070707]';
 
   return (
     <label className="block text-sm font-medium">
@@ -512,7 +603,7 @@ function SelectField({ label, value, options, onChange }) {
       <select
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="mt-2 h-11 w-full rounded-lg border border-[#e5e1da] bg-white px-3 text-sm outline-none focus:border-[#070707]"
+        className="focus-ring mt-2 h-11 w-full rounded-lg border border-[#e5e1da] bg-white px-3 text-sm outline-none transition-colors focus:border-[#070707]"
       >
         {options.map((option) => (
           <option key={option} value={option}>

@@ -142,6 +142,29 @@ export default async function HomePage() {
         </section>
 
         <NewsletterCTA />
+
+        <section className="container py-16 md:py-20">
+          <div className="border-t border-line pt-10 md:grid md:grid-cols-12 md:gap-10">
+            <div className="md:col-span-4">
+              <div className="flex items-center gap-3">
+                <span className="orange-dot" aria-hidden="true" />
+                <p className="eyebrow text-signal">Contact</p>
+              </div>
+              <h2 className="mt-3 font-editorial text-[40px] md:text-[48px] leading-none tracking-tight">Contact</h2>
+            </div>
+            <div className="mt-6 max-w-xl md:col-span-7 md:mt-0">
+              <p className="text-[17px] leading-relaxed text-ink/75">
+                For tips, corrections, startup stories, collaborations, or feedback, write to us.
+              </p>
+              <a
+                href="mailto:fortyfive.build@gmail.com"
+                className="link-underline focus-ring mt-5 inline-flex rounded-sm text-[16px] font-medium text-ink transition-colors hover:text-signal"
+              >
+                fortyfive.build@gmail.com
+              </a>
+            </div>
+          </div>
+        </section>
       </main>
       <Footer />
     </div>
