@@ -51,6 +51,20 @@ export default async function HomePage() {
   const latest = articles.filter((article) => article.slug !== featured?.slug).slice(0, 8);
   const deep = articles.filter((article) => article.deepRead);
 
+  if (!featured) {
+    return (
+      <div className="min-h-screen flex flex-col bg-paper">
+        <Header />
+        <main className="flex-1">
+          <section className="container py-24">
+            <p className="font-editorial text-[32px] md:text-[40px] tracking-tight">No articles found.</p>
+          </section>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-paper">
       <Header />

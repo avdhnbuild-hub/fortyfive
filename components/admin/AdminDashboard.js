@@ -7,11 +7,13 @@ import { getAdminArticles } from '@/lib/adminArticlesClient';
 export default function AdminDashboard() {
   const [articles, setArticles] = useState([]);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     getAdminArticles()
       .then(setArticles)
-      .catch((adminError) => setError(adminError.message));
+      .catch((adminError) => setError(adminError.message))
+      .finally(() => setLoading(false));
   }, []);
 
   const published = articles.filter((article) => article.status === 'Published').length;
@@ -45,6 +47,7 @@ export default function AdminDashboard() {
           </div>
         ))}
       </div>
+      {loading && <p className="text-sm text-[#666666]">Loading articles...</p>}
     </div>
   );
 }

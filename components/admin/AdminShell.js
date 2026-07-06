@@ -16,8 +16,10 @@ export default function AdminShell({ children }) {
   const router = useRouter();
 
   const logout = async () => {
-    const supabase = getSupabaseClient();
-    await supabase.auth.signOut();
+    try {
+      const supabase = getSupabaseClient();
+      await supabase.auth.signOut();
+    } catch {}
     router.refresh();
   };
 

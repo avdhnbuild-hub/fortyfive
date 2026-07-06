@@ -8,11 +8,13 @@ export default function ArticleTable() {
   const [articles, setArticles] = useState([]);
   const [query, setQuery] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     getAdminArticles()
       .then(setArticles)
-      .catch((adminError) => setError(adminError.message));
+      .catch((adminError) => setError(adminError.message))
+      .finally(() => setLoading(false));
   }, []);
 
   const filtered = useMemo(() => {
@@ -53,7 +55,9 @@ export default function ArticleTable() {
           <span className="col-span-2">Status</span>
           <span className="col-span-2 text-right">Action</span>
         </div>
-        {filtered.length === 0 ? (
+        {loading ? (
+          <p className="px-4 py-8 text-sm text-[#666666]">Loading articles...</p>
+        ) : filtered.length === 0 ? (
           <p className="px-4 py-8 text-sm text-[#666666]">No articles found.</p>
         ) : (
           filtered.map((article) => (

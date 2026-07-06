@@ -16,7 +16,7 @@ export default function AdminPreview({ slug }) {
       .finally(() => setReady(true));
   }, [slug]);
 
-  if (!ready) return null;
+  if (!ready) return <p className="text-sm text-[#666666]">Loading preview...</p>;
 
   if (!article) {
     return (

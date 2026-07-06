@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { getAdminArticle, saveAdminArticle, uploadArticleCoverImage } from '@/lib/adminArticlesClient';
 import { emptyArticle, slugify } from '@/lib/adminStore';
 
@@ -151,7 +152,7 @@ export default function ArticleForm({ articleId }) {
     }
   };
 
-  if (!ready) return null;
+  if (!ready) return <p className="text-sm text-[#666666]">Loading article...</p>;
 
   return (
     <div className="space-y-8">
@@ -203,9 +204,12 @@ export default function ArticleForm({ articleId }) {
             {article.coverImageUrl && (
               <div>
                 <p className="text-sm font-medium">Preview</p>
-                <img
+                <Image
                   src={article.coverImageUrl}
                   alt=""
+                  width={800}
+                  height={450}
+                  unoptimized
                   className="mt-3 aspect-[16/9] w-full rounded-lg border border-[#e5e1da] object-cover"
                 />
               </div>

@@ -79,6 +79,12 @@ export default async function CategoryPage({ params }) {
           </section>
         )}
 
+        {articles.length === 0 && (
+          <section className="container py-16 md:py-20">
+            <p className="font-editorial text-[32px] md:text-[40px] tracking-tight">No articles found.</p>
+          </section>
+        )}
+
         {deep.length > 0 && (
           <section className="bg-white border-y border-line">
             <div className="container py-20">

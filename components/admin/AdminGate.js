@@ -70,23 +70,31 @@ export default function AdminGate({ children }) {
     event.preventDefault();
     setError('');
 
-    const supabase = getSupabaseClient();
-    const { error: loginError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const supabase = getSupabaseClient();
+      const { error: loginError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (loginError) {
-      setError(loginError.message);
+      if (loginError) {
+        setError(loginError.message);
+      }
+    } catch (clientError) {
+      setError(clientError.message);
     }
   };
 
   const logout = async () => {
     setError('');
-    const supabase = getSupabaseClient();
-    await supabase.auth.signOut();
-    setAllowed(false);
-    setSignedIn(false);
+    try {
+      const supabase = getSupabaseClient();
+      await supabase.auth.signOut();
+      setAllowed(false);
+      setSignedIn(false);
+    } catch (clientError) {
+      setError(clientError.message);
+    }
   };
 
   if (!ready) return null;

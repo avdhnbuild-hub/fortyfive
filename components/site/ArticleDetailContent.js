@@ -6,6 +6,7 @@ import NewsletterCTA from '@/components/site/NewsletterCTA';
 import ArticleCard from '@/components/site/ArticleCard';
 import ShareBar from '@/components/site/ShareBar';
 import { CATEGORIES } from '@/lib/data';
+import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
@@ -62,9 +63,12 @@ export default function ArticleDetailContent({ initialArticle, initialArticles =
           <ShareBar article={article} />
 
           {article.coverImageUrl && (
-            <img
+            <Image
               src={article.coverImageUrl}
               alt=""
+              width={1200}
+              height={675}
+              unoptimized
               className="mt-10 aspect-[16/9] w-full rounded-xl object-cover"
             />
           )}
