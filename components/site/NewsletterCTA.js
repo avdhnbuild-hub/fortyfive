@@ -1,34 +1,38 @@
 'use client';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { isValidSubscriberEmail, normalizeSubscriberEmail, subscribeToNewsletter } from '@/lib/newsletterClient';
 
 export default function NewsletterCTA({ variant = 'full' }) {
   const [email, setEmail] = useState('');
   const [done, setDone] = useState(false);
+  const [message, setMessage] = useState('Subscribed.');
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    const normalizedEmail = email.trim().toLowerCase();
-    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail);
+    const normalizedEmail = normalizeSubscriberEmail(email);
 
-    if (!isValidEmail) {
+    if (!isValidSubscriberEmail(normalizedEmail)) {
       toast.error('Enter a valid email');
       return;
     }
 
-    let existing = [];
     try {
-      const storedSubscribers = JSON.parse(localStorage.getItem('fortyfive_subscribers') || '[]');
-      existing = Array.isArray(storedSubscribers) ? storedSubscribers : [];
-    } catch {
-      existing = [];
-    }
-    if (!existing.includes(normalizedEmail)) {
-      localStorage.setItem('fortyfive_subscribers', JSON.stringify([...existing, normalizedEmail]));
-    }
+      const result = await subscribeToNewsletter(normalizedEmail);
 
-    setDone(true);
-    toast.success('Subscribed.');
+      if (result.duplicate) {
+        setMessage('You are already subscribed.');
+        setDone(true);
+        toast.success('You are already subscribed.');
+        return;
+      }
+
+      setMessage('Subscribed.');
+      setDone(true);
+      toast.success('Subscribed.');
+    } catch {
+      toast.error('Could not subscribe. Please try again.');
+    }
   };
 
   if (variant === 'inline') {
@@ -39,7 +43,7 @@ export default function NewsletterCTA({ variant = 'full' }) {
           Read the stories behind startups, capital, and technology.
         </h3>
         {done ? (
-          <p className="mt-4 text-[15px] text-ink/80">Subscribed.</p>
+          <p className="mt-4 text-[15px] text-ink/80">{message}</p>
         ) : (
           <form onSubmit={submit} className="mt-5 flex flex-col sm:flex-row gap-2">
             <input
@@ -74,7 +78,7 @@ export default function NewsletterCTA({ variant = 'full' }) {
         <div className="md:col-span-5">
           {done ? (
             <div className="p-8 rounded-2xl bg-white/5 border border-white/10">
-              <p className="font-editorial text-2xl">Subscribed.</p>
+              <p className="font-editorial text-2xl">{message}</p>
               <p className="mt-2 text-white/70">First issue lands soon. Check your inbox.</p>
             </div>
           ) : (
