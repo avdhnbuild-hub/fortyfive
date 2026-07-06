@@ -1,5 +1,6 @@
 import './globals.css';
 import { Toaster } from 'sonner';
+import { Analytics } from '@vercel/analytics/next';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://fortyfive.vercel.app';
 const description = 'Startups, technology, capital, AI, growth, markets, and the companies shaping what comes next.';
@@ -44,6 +45,7 @@ export default function RootLayout({ children }) {
       <body className="min-h-screen bg-paper text-ink antialiased">
         {children}
         <Toaster position="bottom-center" />
+        <Analytics />
       </body>
     </html>
   );
