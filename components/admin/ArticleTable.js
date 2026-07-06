@@ -2,14 +2,17 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { getAdminArticles } from '@/lib/adminStore';
+import { getAdminArticles } from '@/lib/adminArticlesClient';
 
 export default function ArticleTable() {
   const [articles, setArticles] = useState([]);
   const [query, setQuery] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    setArticles(getAdminArticles());
+    getAdminArticles()
+      .then(setArticles)
+      .catch((adminError) => setError(adminError.message));
   }, []);
 
   const filtered = useMemo(() => {
@@ -40,6 +43,8 @@ export default function ArticleTable() {
         placeholder="Search by title or category"
         className="h-11 w-full rounded-lg border border-[#e5e1da] bg-white px-4 text-sm outline-none focus:border-[#070707]"
       />
+
+      {error && <p className="text-sm text-[#ff5a1f]">{error}</p>}
 
       <div className="overflow-hidden rounded-xl border border-[#e5e1da] bg-white">
         <div className="grid grid-cols-12 border-b border-[#e5e1da] px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-[#666666]">

@@ -2,15 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getAdminArticles } from '@/lib/adminStore';
+import { getAdminArticleBySlug } from '@/lib/adminArticlesClient';
 
 export default function AdminPreview({ slug }) {
   const [article, setArticle] = useState(null);
   const [ready, setReady] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    setArticle(getAdminArticles().find((item) => item.slug === slug) || null);
-    setReady(true);
+    getAdminArticleBySlug(slug)
+      .then((storedArticle) => setArticle(storedArticle))
+      .catch((adminError) => setError(adminError.message))
+      .finally(() => setReady(true));
   }, [slug]);
 
   if (!ready) return null;
@@ -19,7 +22,8 @@ export default function AdminPreview({ slug }) {
     return (
       <div className="rounded-xl border border-[#e5e1da] bg-white p-8">
         <h1 className="text-3xl font-semibold tracking-tight">Preview not found</h1>
-        <p className="mt-3 text-sm text-[#666666]">This local article may have been deleted or renamed.</p>
+        <p className="mt-3 text-sm text-[#666666]">This article may have been deleted or renamed.</p>
+        {error && <p className="mt-3 text-sm text-[#ff5a1f]">{error}</p>}
         <Link href="/admin/articles" className="mt-6 inline-flex text-sm font-medium text-[#ff5a1f] hover:text-[#070707]">
           Back to articles
         </Link>

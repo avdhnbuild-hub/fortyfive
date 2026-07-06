@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import AdminGate from '@/components/admin/AdminGate';
-import { ADMIN_AUTH_KEY } from '@/lib/adminStore';
+import { getSupabaseClient } from '@/lib/supabase/client';
 
 const nav = [
   { href: '/admin', label: 'Dashboard' },
@@ -15,8 +15,9 @@ export default function AdminShell({ children }) {
   const pathname = usePathname();
   const router = useRouter();
 
-  const logout = () => {
-    localStorage.removeItem(ADMIN_AUTH_KEY);
+  const logout = async () => {
+    const supabase = getSupabaseClient();
+    await supabase.auth.signOut();
     router.refresh();
   };
 

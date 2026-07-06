@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { emptyArticle, getAdminArticle, slugify, upsertAdminArticle } from '@/lib/adminStore';
+import { getAdminArticle, saveAdminArticle } from '@/lib/adminArticlesClient';
+import { emptyArticle, slugify } from '@/lib/adminStore';
 
 const categories = ['Startups', 'Technology', 'AI', 'Funding', 'Growth', 'Markets', 'India', 'Global', 'Opinion'];
 const regions = ['India', 'Global', 'Both'];
@@ -15,19 +16,23 @@ export default function ArticleForm({ articleId }) {
     date: new Date().toISOString().slice(0, 10),
   });
   const [ready, setReady] = useState(!articleId);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!articleId) return;
 
-    const stored = getAdminArticle(articleId);
-    if (stored) {
-      setArticle({
-        ...emptyArticle,
-        ...stored,
-        bodySections: stored.bodySections?.length ? stored.bodySections : emptyArticle.bodySections,
-      });
-    }
-    setReady(true);
+    getAdminArticle(articleId)
+      .then((stored) => {
+        if (stored) {
+          setArticle({
+            ...emptyArticle,
+            ...stored,
+            bodySections: stored.bodySections?.length ? stored.bodySections : emptyArticle.bodySections,
+          });
+        }
+      })
+      .catch((adminError) => setError(adminError.message))
+      .finally(() => setReady(true));
   }, [articleId]);
 
   const updateField = (field, value) => {
@@ -63,26 +68,37 @@ export default function ArticleForm({ articleId }) {
     }));
   };
 
-  const save = (status) => {
+  const save = async (status) => {
     if (!article.title.trim()) return;
+    setError('');
 
-    const savedArticle = upsertAdminArticle({
-      ...article,
-      status,
-      slug: article.slug || slugify(article.title),
-    });
-    router.push('/admin/articles');
-    return savedArticle;
+    try {
+      const savedArticle = await saveAdminArticle({
+        ...article,
+        status,
+        slug: article.slug || slugify(article.title),
+      });
+      router.push('/admin/articles');
+      return savedArticle;
+    } catch (adminError) {
+      setError(adminError.message);
+      return null;
+    }
   };
 
-  const preview = () => {
+  const preview = async () => {
     if (!article.title.trim()) return;
+    setError('');
 
-    const savedArticle = upsertAdminArticle({
-      ...article,
-      slug: article.slug || slugify(article.title),
-    });
-    router.push(`/admin/preview/${savedArticle.slug}`);
+    try {
+      const savedArticle = await saveAdminArticle({
+        ...article,
+        slug: article.slug || slugify(article.title),
+      });
+      router.push(`/admin/preview/${savedArticle.slug}`);
+    } catch (adminError) {
+      setError(adminError.message);
+    }
   };
 
   if (!ready) return null;
@@ -110,6 +126,8 @@ export default function ArticleForm({ articleId }) {
           <Field label="Date" type="date" value={article.date} onChange={(value) => updateField('date', value)} />
           <Field label="Read time" value={article.readTime} onChange={(value) => updateField('readTime', value)} placeholder="6 min read" />
           <Field label="Tags" value={article.tags} onChange={(value) => updateField('tags', value)} placeholder="AI, SaaS, funding" />
+          <Field label="Cover image URL" value={article.coverImageUrl} onChange={(value) => updateField('coverImageUrl', value)} />
+          <Field label="OG image URL" value={article.ogImageUrl} onChange={(value) => updateField('ogImageUrl', value)} />
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
@@ -150,6 +168,8 @@ export default function ArticleForm({ articleId }) {
             ))}
           </div>
         </section>
+
+        {error && <p className="text-sm text-[#ff5a1f]">{error}</p>}
 
         <div className="flex flex-wrap gap-3">
           <button type="button" onClick={() => save('Draft')} className="h-11 rounded-lg border border-[#e5e1da] bg-white px-5 text-sm font-medium hover:border-[#ff5a1f]">
