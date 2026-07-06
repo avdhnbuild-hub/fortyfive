@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { getAdminArticle, saveAdminArticle, uploadArticleCoverImage } from '@/lib/adminArticlesClient';
+import { deleteArticle, getAdminArticle, saveAdminArticle, uploadArticleCoverImage } from '@/lib/adminArticlesClient';
 import { emptyArticle, slugify } from '@/lib/adminStore';
 
 const categories = ['Startups', 'Technology', 'AI', 'Funding', 'Growth', 'Markets', 'India', 'Global', 'Opinion'];
@@ -22,6 +22,7 @@ export default function ArticleForm({ articleId }) {
   const [error, setError] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!articleId) return;
@@ -152,6 +153,22 @@ export default function ArticleForm({ articleId }) {
     }
   };
 
+  const removeArticle = async () => {
+    if (!articleId) return;
+    if (!window.confirm('Delete this article permanently? This cannot be undone.')) return;
+
+    setError('');
+    setDeleting(true);
+
+    try {
+      await deleteArticle(articleId);
+      router.push('/admin/articles');
+    } catch (adminError) {
+      setError(adminError.message || 'Could not delete article.');
+      setDeleting(false);
+    }
+  };
+
   if (!ready) return <p className="text-sm text-[#666666]">Loading article...</p>;
 
   return (
@@ -268,6 +285,16 @@ export default function ArticleForm({ articleId }) {
           <button type="button" onClick={preview} className="h-11 rounded-lg border border-[#e5e1da] bg-white px-5 text-sm font-medium hover:border-[#ff5a1f]">
             Preview
           </button>
+          {articleId && (
+            <button
+              type="button"
+              onClick={removeArticle}
+              disabled={deleting}
+              className="h-11 rounded-lg border border-[#e5e1da] bg-white px-5 text-sm font-medium hover:border-[#ff5a1f] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {deleting ? 'Deleting...' : 'Delete'}
+            </button>
+          )}
         </div>
       </form>
     </div>

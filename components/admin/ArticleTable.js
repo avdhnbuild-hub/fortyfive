@@ -2,13 +2,15 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { getAdminArticles } from '@/lib/adminArticlesClient';
+import { deleteArticle, getAdminArticles } from '@/lib/adminArticlesClient';
 
 export default function ArticleTable() {
   const [articles, setArticles] = useState([]);
   const [query, setQuery] = useState('');
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState('');
 
   useEffect(() => {
     getAdminArticles()
@@ -25,6 +27,25 @@ export default function ArticleTable() {
       [article.title, article.category].some((field) => field?.toLowerCase().includes(value))
     );
   }, [articles, query]);
+
+  const removeArticle = async (article) => {
+    if (!article?.id) return;
+    if (!window.confirm('Delete this article permanently? This cannot be undone.')) return;
+
+    setError('');
+    setMessage('');
+    setDeletingId(article.id);
+
+    try {
+      await deleteArticle(article.id);
+      setArticles((current) => current.filter((item) => item.id !== article.id));
+      setMessage('Article deleted.');
+    } catch (adminError) {
+      setError(adminError.message || 'Could not delete article.');
+    } finally {
+      setDeletingId('');
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -47,6 +68,7 @@ export default function ArticleTable() {
       />
 
       {error && <p className="text-sm text-[#ff5a1f]">{error}</p>}
+      {message && <p className="text-sm text-[#666666]">{message}</p>}
 
       <div className="overflow-hidden rounded-xl border border-[#e5e1da] bg-white">
         <div className="grid grid-cols-12 border-b border-[#e5e1da] px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-[#666666]">
@@ -72,10 +94,21 @@ export default function ArticleTable() {
                   {article.status || 'Draft'}
                 </span>
               </div>
-              <div className="col-span-2 text-right">
+              <div className="col-span-2 flex justify-end gap-3 text-right">
                 <Link href={`/admin/articles/${article.id}/edit`} className="text-sm font-medium text-[#ff5a1f] hover:text-[#070707]">
                   Edit
                 </Link>
+                <Link href={`/admin/preview/${article.slug}`} className="text-sm font-medium text-[#ff5a1f] hover:text-[#070707]">
+                  Preview
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => removeArticle(article)}
+                  disabled={deletingId === article.id}
+                  className="text-sm font-medium text-[#ff5a1f] hover:text-[#070707] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {deletingId === article.id ? 'Deleting...' : 'Delete'}
+                </button>
               </div>
             </div>
           ))
