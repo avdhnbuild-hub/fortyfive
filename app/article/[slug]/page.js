@@ -2,6 +2,8 @@ import ArticleDetailContent from '@/components/site/ArticleDetailContent';
 import { ARTICLES } from '@/lib/data';
 import { getPublishedArticleBySlug, getPublishedArticles } from '@/lib/articlesDb';
 
+const DEFAULT_OG_IMAGE = '/og-default.png';
+
 export function generateStaticParams() {
   return ARTICLES.map((a) => ({ slug: a.slug }));
 }
@@ -11,18 +13,19 @@ export async function generateMetadata({ params }) {
   const article = await getPublishedArticleBySlug(slug);
   if (!article) return { title: 'Story not found: fortyfive' };
   const description = article.seoDescription || article.summary || article.subtitle;
-  const image = article.ogImageUrl || article.coverImageUrl || '/og-image.svg';
+  const title = article.seoTitle || article.title;
+  const image = article.ogImageUrl || article.coverImageUrl || DEFAULT_OG_IMAGE;
   const url = `/article/${article.slug}`;
 
   return {
-    title: article.seoTitle || article.title,
+    title,
     description,
     authors: [{ name: article.author }],
     alternates: {
       canonical: url,
     },
     openGraph: {
-      title: article.seoTitle || article.title,
+      title,
       description,
       siteName: 'fortyfive',
       type: 'article',
@@ -40,7 +43,7 @@ export async function generateMetadata({ params }) {
     },
     twitter: {
       card: 'summary_large_image',
-      title: article.seoTitle || article.title,
+      title,
       description,
       images: [image],
     },
